@@ -2,6 +2,13 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 const FILTERS = ["todas", "activas", "completadas"];
+const SUGGESTED_TODOS = [
+  "Estirar 5 minutos",
+  "Responder un correo pendiente",
+  "Ordenar el escritorio",
+  "Tomar agua",
+  "Revisar una idea nueva",
+];
 
 function App() {
   const [todos, setTodos] = useState(() => {
@@ -16,6 +23,7 @@ function App() {
   const [filter, setFilter] = useState("todas");
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [suggestion, setSuggestion] = useState(SUGGESTED_TODOS[0]);
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
@@ -51,6 +59,22 @@ function App() {
     setTodos(todos.filter((t) => !t.done));
   };
 
+  const pickSuggestion = () => {
+    const available = SUGGESTED_TODOS.filter((item) => item !== suggestion);
+    const nextPool = available.length ? available : SUGGESTED_TODOS;
+    const nextSuggestion =
+      nextPool[Math.floor(Math.random() * nextPool.length)];
+    setSuggestion(nextSuggestion);
+  };
+
+  const addSuggestedTodo = () => {
+    setTodos([
+      ...todos,
+      { id: Date.now(), text: suggestion, done: false },
+    ]);
+    pickSuggestion();
+  };
+
   const filtered = todos.filter((t) => {
     if (filter === "activas") return !t.done;
     if (filter === "completadas") return t.done;
@@ -84,6 +108,21 @@ function App() {
           <button className="add-btn" onClick={addTodo}>
             <span>+</span>
           </button>
+        </div>
+
+        <div className="suggestion-card">
+          <div>
+            <p className="suggestion-label">idea rapida</p>
+            <p className="suggestion-text">{suggestion}</p>
+          </div>
+          <div className="suggestion-actions">
+            <button className="ghost-btn" onClick={pickSuggestion}>
+              Cambiar
+            </button>
+            <button className="ghost-btn accent" onClick={addSuggestedTodo}>
+              Agregar
+            </button>
+          </div>
         </div>
 
         <div className="filters">
