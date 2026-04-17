@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import "./App.css";
 
 const FILTERS = ["todas", "activas", "completadas"];
@@ -25,10 +26,62 @@ function App() {
   const [editText, setEditText] = useState("");
   const [suggestion, setSuggestion] = useState(SUGGESTED_TODOS[0]);
   const [query, setQuery] = useState("");
+  const [remoteIdea, setRemoteIdea] = useState("");
+  const [remoteStatus, setRemoteStatus] = useState("loading");
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
+
+  const fetchRemoteIdea = async () => {
+    setRemoteStatus("loading");
+
+    try {
+      const response = await axios.get(
+        "https://official-joke-api.appspot.com/random_joke",
+      );
+      const joke = [response.data.setup, response.data.punchline]
+        .filter(Boolean)
+        .join(" ");
+
+      setRemoteIdea(joke || "Tomate una pausa y vuelve con una idea nueva.");
+      setRemoteStatus("success");
+    } catch {
+      setRemoteIdea("No pude cargar la idea online por ahora.");
+      setRemoteStatus("error");
+    }
+  };
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadRemoteIdea = async () => {
+      try {
+        const response = await axios.get(
+          "https://official-joke-api.appspot.com/random_joke",
+        );
+        const joke = [response.data.setup, response.data.punchline]
+          .filter(Boolean)
+          .join(" ");
+
+        if (ignore) return;
+
+        setRemoteIdea(joke || "Tomate una pausa y vuelve con una idea nueva.");
+        setRemoteStatus("success");
+      } catch {
+        if (ignore) return;
+
+        setRemoteIdea("No pude cargar la idea online por ahora.");
+        setRemoteStatus("error");
+      }
+    };
+
+    loadRemoteIdea();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const addTodo = () => {
     const trimmed = input.trim();
@@ -205,6 +258,23 @@ function App() {
               Agregar
             </button>
           </div>
+        </div>
+
+        <div className="api-card">
+          <div className="api-card-head">
+            <div>
+              <p className="suggestion-label">api libre</p>
+              <p className="api-title">Idea desde internet</p>
+            </div>
+            <button className="ghost-btn" onClick={fetchRemoteIdea}>
+              {remoteStatus === "loading" ? "Cargando..." : "Refrescar"}
+            </button>
+          </div>
+          <p className={`api-copy ${remoteStatus === "error" ? "error" : ""}`}>
+            {remoteStatus === "loading"
+              ? "Buscando algo nuevo..."
+              : remoteIdea}
+          </p>
         </div>
 
         <div className="filters">

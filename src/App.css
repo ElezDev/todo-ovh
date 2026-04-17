@@ -299,6 +299,39 @@ h1 {
   border-radius: var(--radius);
 }
 
+.api-card {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.api-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.api-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.api-copy {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.api-copy.error {
+  color: #ff9a9a;
+}
+
 .suggestion-label {
   font-size: 10px;
   letter-spacing: 0.18em;
@@ -609,7 +642,8 @@ h1 {
   }
 
   .overview-top,
-  .suggestion-card {
+  .suggestion-card,
+  .api-card-head {
     flex-direction: column;
     align-items: stretch;
   }
