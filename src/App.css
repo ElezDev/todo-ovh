@@ -21,7 +21,9 @@
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top, rgba(232, 255, 71, 0.09), transparent 26%),
+    linear-gradient(180deg, #111111 0%, #090909 100%);
   color: var(--text);
   font-family: 'DM Mono', monospace;
   min-height: 100vh;
@@ -51,6 +53,78 @@ body {
   width: 100%;
   max-width: 540px;
   animation: fadeUp 0.5s ease both;
+}
+
+.overview-card {
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid rgba(232, 255, 71, 0.14);
+  border-radius: calc(var(--radius) + 4px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+    rgba(26, 26, 26, 0.92);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+}
+
+.overview-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.overview-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.overview-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.overview-badge {
+  min-width: 68px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(232, 255, 71, 0.1);
+  border: 1px solid rgba(232, 255, 71, 0.18);
+  color: var(--accent);
+  text-align: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.progress-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #f5ff99);
+  transition: width 0.25s ease;
+}
+
+.overview-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
 }
 
 @keyframes fadeUp {
@@ -148,6 +222,67 @@ h1 {
 
 .add-btn:active {
   transform: scale(0.97);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.toolbar-copy {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.search-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  padding: 11px 40px 11px 14px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-clear {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 999px;
+}
+
+.search-clear:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .suggestion-card {
@@ -255,11 +390,26 @@ h1 {
 }
 
 .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   color: var(--text-muted);
   font-size: 13px;
-  padding: 40px 0;
+  padding: 32px 20px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
   letter-spacing: 0.05em;
+  gap: 8px;
+}
+
+.empty-title {
+  color: var(--text);
+}
+
+.empty-copy {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .todo-item {
@@ -291,6 +441,10 @@ h1 {
 .todo-item.done .todo-text {
   text-decoration: line-through;
   color: var(--done-color);
+}
+
+.todo-item.done {
+  opacity: 0.82;
 }
 
 /* CHECKBOX */
@@ -450,12 +604,39 @@ h1 {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 @media (max-width: 640px) {
+  .app {
+    padding: 32px 14px 60px;
+  }
+
+  .overview-top,
   .suggestion-card {
     flex-direction: column;
     align-items: stretch;
   }
 
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-copy {
+    white-space: normal;
+  }
+
   .suggestion-actions {
     justify-content: flex-end;
+  }
+
+  .stats {
+    flex-direction: column;
+  }
+
+  .stat {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat:last-child {
+    border-bottom: none;
   }
 }

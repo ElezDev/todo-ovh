@@ -24,6 +24,7 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [suggestion, setSuggestion] = useState(SUGGESTED_TODOS[0]);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
@@ -75,13 +76,54 @@ function App() {
     pickSuggestion();
   };
 
-  const filtered = todos.filter((t) => {
-    if (filter === "activas") return !t.done;
-    if (filter === "completadas") return t.done;
-    return true;
+  const filtered = todos.filter((todo) => {
+    const matchesFilter =
+      filter === "activas"
+        ? !todo.done
+        : filter === "completadas"
+          ? todo.done
+          : true;
+    const matchesQuery = todo.text.toLowerCase().includes(query.toLowerCase().trim());
+
+    return matchesFilter && matchesQuery;
   });
 
-  const remaining = todos.filter((t) => !t.done).length;
+  const completed = todos.filter((t) => t.done).length;
+  const remaining = todos.length - completed;
+  const progress = todos.length ? Math.round((completed / todos.length) * 100) : 0;
+  const hasQuery = query.trim().length > 0;
+  const statusLabel =
+    progress === 100
+      ? "Todo listo"
+      : remaining === 0
+        ? "Sin tareas activas"
+        : `${remaining} por cerrar`;
+
+  const filteredByQueryOnly = todos.filter((todo) => {
+    return todo.text.toLowerCase().includes(query.toLowerCase().trim());
+  });
+
+  const hasResultsForCurrentFilter = filtered.length > 0;
+  const hasResultsIgnoringFilter = filteredByQueryOnly.length > 0;
+
+  const emptyMessage = hasQuery
+    ? hasResultsIgnoringFilter
+      ? "No hay tareas para esta busqueda con el filtro actual."
+      : "No encontre tareas con ese texto."
+    : "No hay tareas aqui.";
+
+  const emptyHint = hasQuery
+    ? "Prueba otra palabra o cambia el filtro."
+    : "Agrega una nueva o usa la idea rapida.";
+
+  const clearSearch = () => {
+    setQuery("");
+  };
+
+  const visibleTodos =
+    filter === "todas"
+      ? [...filtered].sort((a, b) => Number(a.done) - Number(b.done))
+      : filtered;
 
   return (
     <div className="app">
@@ -96,6 +138,24 @@ function App() {
           <p className="subtitle">{remaining} tareas pendientes</p>
         </header>
 
+        <section className="overview-card">
+          <div className="overview-top">
+            <div>
+              <p className="overview-label">avance</p>
+              <p className="overview-title">{statusLabel}</p>
+            </div>
+            <div className="overview-badge">{progress}%</div>
+          </div>
+          <div className="progress-track" aria-hidden="true">
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <div className="overview-meta">
+            <span>{completed} hechas</span>
+            <span>{remaining} pendientes</span>
+            <span>{todos.length} total</span>
+          </div>
+        </section>
+
         <div className="input-row">
           <input
             className="main-input"
@@ -108,6 +168,28 @@ function App() {
           <button className="add-btn" onClick={addTodo}>
             <span>+</span>
           </button>
+        </div>
+
+        <div className="toolbar">
+          <div className="search-wrap">
+            <input
+              className="search-input"
+              type="text"
+              placeholder="Buscar tareas..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            {hasQuery && (
+              <button
+                className="search-clear"
+                onClick={clearSearch}
+                title="Limpiar busqueda"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <div className="toolbar-copy">Doble clic para editar</div>
         </div>
 
         <div className="suggestion-card">
@@ -138,10 +220,13 @@ function App() {
         </div>
 
         <ul className="todo-list">
-          {filtered.length === 0 && (
-            <li className="empty-state">No hay tareas aquí 🎉</li>
+          {!hasResultsForCurrentFilter && (
+            <li className="empty-state">
+              <span className="empty-title">{emptyMessage}</span>
+              <span className="empty-copy">{emptyHint}</span>
+            </li>
           )}
-          {filtered.map((todo, i) => (
+          {visibleTodos.map((todo, i) => (
             <li
               key={todo.id}
               className={`todo-item ${todo.done ? "done" : ""}`}
@@ -209,7 +294,7 @@ function App() {
             <span className="stat-label">total</span>
           </div>
           <div className="stat">
-            <span className="stat-num">{todos.filter((t) => t.done).length}</span>
+            <span className="stat-num">{completed}</span>
             <span className="stat-label">hechas</span>
           </div>
           <div className="stat">
